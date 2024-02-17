@@ -10,7 +10,7 @@ import com.sismics.books.core.model.jpa.User;
  *
  * @author bgamard 
  */
-public class BookImportedEvent {
+public class BookImportedEvent{
     /**
      * User requesting the import.
      */

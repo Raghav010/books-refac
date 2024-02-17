@@ -48,7 +48,7 @@ import com.sismics.util.filter.TokenBasedSecurityFilter;
  * @author jtremeaux
  */
 @Path("/user")
-public class UserResource extends BaseResource {
+public class UserResource extends ExtendedBaseResource {
     /**
      * Creates a new user.
      * 
