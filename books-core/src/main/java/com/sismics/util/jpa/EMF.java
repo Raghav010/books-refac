@@ -78,6 +78,11 @@ public final class EMF {
         
         // Use environment parameters
         log.info("Configuring EntityManager from environment parameters");
+        Map<Object, Object> props = getProps();
+        return props;
+    }
+
+    private static Map<Object, Object> getProps() {
         Map<Object, Object> props = new HashMap<Object, Object>();
         props.put("hibernate.connection.driver_class", "org.hsqldb.jdbcDriver");
         File dbDirectory = DirectoryUtil.getDbDirectory();
@@ -92,7 +97,7 @@ public final class EMF {
         props.put("hibernate.cache.use_second_level_cache", "false");
         return props;
     }
-    
+
     /**
      * Private constructor.
      */

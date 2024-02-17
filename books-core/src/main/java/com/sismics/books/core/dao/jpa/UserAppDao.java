@@ -125,6 +125,12 @@ public class UserAppDao {
         sb.append(" order by a.APP_ID_C ");
         Query q = em.createNativeQuery(sb.toString());
         q.setParameter("userId", userId);
+        List<UserAppDto> userAppDtoList = getUserAppDtoList(userId, q);
+
+        return userAppDtoList;
+    }
+
+    private static List<UserAppDto> getUserAppDtoList(String userId, Query q) {
         List<Object[]> l = q.getResultList();
         List<UserAppDto> userAppDtoList = new ArrayList<UserAppDto>();
         for (Object[] o : l) {
@@ -139,7 +145,6 @@ public class UserAppDao {
             userAppDto.setSharing(sharing != null ? sharing : false);
             userAppDtoList.add(userAppDto);
         }
-        
         return userAppDtoList;
     }
 
@@ -157,20 +162,7 @@ public class UserAppDao {
         Query q = em.createNativeQuery(sb.toString());
         q.setParameter("userId", userId);
         List<Object[]> l = q.getResultList();
-        List<UserAppDto> userAppDtoList = new ArrayList<UserAppDto>();
-        for (Object[] o : l) {
-            int i = 0;
-            UserAppDto userAppDto = new UserAppDto();
-            userAppDto.setId((String) o[i++]);
-            userAppDto.setAppId((String) o[i++]);
-            userAppDto.setUserId(userId);
-            userAppDto.setAccessToken((String) o[i++]);
-            userAppDto.setUsername((String) o[i++]);
-            Boolean sharing = (Boolean) o[i++];
-            userAppDto.setSharing(sharing != null ? sharing : false);
-            userAppDtoList.add(userAppDto);
-        }
-        
+        List<UserAppDto> userAppDtoList = getUserAppDtoList(userId, q);
         return userAppDtoList;
     }
 
@@ -190,20 +182,8 @@ public class UserAppDao {
         Query q = em.createNativeQuery(sb.toString());
         q.setParameter("appId", appId);
         List<Object[]> l = q.getResultList();
-        List<UserAppDto> userAppDtoList = new ArrayList<UserAppDto>();
-        for (Object[] o : l) {
-            int i = 0;
-            UserAppDto userAppDto = new UserAppDto();
-            userAppDto.setId((String) o[i++]);
-            userAppDto.setUserId((String) o[i++]);
-            userAppDto.setAppId((String) o[i++]);
-            userAppDto.setAccessToken((String) o[i++]);
-            userAppDto.setUsername((String) o[i++]);
-            Boolean sharing = (Boolean) o[i++];
-            userAppDto.setSharing(sharing != null ? sharing : false);
-            userAppDtoList.add(userAppDto);
-        }
-        
+        List<UserAppDto> userAppDtoList = getUserAppDtoList(appId, q);
+
         return userAppDtoList;
     }
 

@@ -1,6 +1,7 @@
 package com.sismics.books.core.service;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -166,14 +167,8 @@ public class BookDataService extends AbstractIdleService {
      */
     private Book searchBookWithGoogle(String isbn) throws Exception {
         googleRateLimiter.acquire();
-        
-        URL url = new URL(String.format(Locale.ENGLISH, GOOGLE_BOOKS_SEARCH_FORMAT, isbn, apiKeyGoogle));
-        URLConnection connection = url.openConnection();
-        connection.setRequestProperty("Accept-Charset", "utf-8");
-        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36");
-        connection.setConnectTimeout(10000);
-        connection.setReadTimeout(10000);
-        InputStream inputStream = connection.getInputStream();
+
+        InputStream inputStream = getStream(String.format(Locale.ENGLISH, GOOGLE_BOOKS_SEARCH_FORMAT, isbn, apiKeyGoogle));
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(inputStream, JsonNode.class);
         ArrayNode items = (ArrayNode) rootNode.get("items");
@@ -218,6 +213,17 @@ public class BookDataService extends AbstractIdleService {
         return book;
     }
 
+    private InputStream getStream(String ENGLISH) throws IOException {
+        URL url = new URL(ENGLISH);
+        URLConnection connection = url.openConnection();
+        connection.setRequestProperty("Accept-Charset", "utf-8");
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36");
+        connection.setConnectTimeout(10000);
+        connection.setReadTimeout(10000);
+        InputStream inputStream = connection.getInputStream();
+        return inputStream;
+    }
+
     /**
      * Search a book by its ISBN using Open Library.
      * 
@@ -226,14 +232,8 @@ public class BookDataService extends AbstractIdleService {
      */
     private Book searchBookWithOpenLibrary(String isbn) throws Exception {
         openLibraryRateLimiter.acquire();
-        
-        URL url = new URL(String.format(Locale.ENGLISH, OPEN_LIBRARY_FORMAT, isbn));
-        URLConnection connection = url.openConnection();
-        connection.setRequestProperty("Accept-Charset", "utf-8");
-        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36");
-        connection.setConnectTimeout(10000);
-        connection.setReadTimeout(10000);
-        InputStream inputStream = connection.getInputStream();
+
+        InputStream inputStream = getStream(String.format(Locale.ENGLISH, OPEN_LIBRARY_FORMAT, isbn));
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(inputStream, JsonNode.class);
         if (rootNode instanceof ArrayNode) {
