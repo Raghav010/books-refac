@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
+import com.sismics.books.core.interfaces.Dao;
 import com.sismics.books.core.dao.jpa.dto.UserAppDto;
 import com.sismics.books.core.model.jpa.UserApp;
 import com.sismics.util.context.ThreadLocalContext;
@@ -18,7 +19,7 @@ import com.sismics.util.context.ThreadLocalContext;
  * 
  * @author jtremeaux
  */
-public class UserAppDao {
+public class UserAppDao implements Dao<UserApp> {
     /**
      * Create a new connection.
      * 

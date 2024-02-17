@@ -1,6 +1,8 @@
 package com.sismics.books.core.dao.jpa;
 
 import com.google.common.base.Joiner;
+
+import com.sismics.books.core.interfaces.Dao;
 import com.sismics.books.core.constant.Constants;
 import com.sismics.books.core.dao.jpa.dto.UserDto;
 import com.sismics.books.core.model.jpa.User;
@@ -22,7 +24,7 @@ import java.util.*;
  * 
  * @author jtremeaux
  */
-public class UserDao {
+public class UserDao implements Dao<User> {
     /**
      * Authenticates an user.
      * 

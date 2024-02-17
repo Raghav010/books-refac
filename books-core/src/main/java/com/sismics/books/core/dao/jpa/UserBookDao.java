@@ -14,6 +14,8 @@ import javax.persistence.Query;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+
+import com.sismics.books.core.interfaces.Dao;
 import com.sismics.books.core.dao.jpa.criteria.UserBookCriteria;
 import com.sismics.books.core.dao.jpa.dto.UserBookDto;
 import com.sismics.books.core.model.jpa.UserBook;
@@ -29,7 +31,7 @@ import com.sismics.util.context.ThreadLocalContext;
  * 
  * @author bgamard
  */
-public class UserBookDao {
+public class UserBookDao implements Dao<UserBook>{
     /**
      * Creates a new user book.
      * 

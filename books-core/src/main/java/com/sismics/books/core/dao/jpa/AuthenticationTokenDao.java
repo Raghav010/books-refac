@@ -1,5 +1,6 @@
 package com.sismics.books.core.dao.jpa;
 
+import com.sismics.books.core.interfaces.Dao;
 import com.sismics.books.core.model.jpa.AuthenticationToken;
 import com.sismics.util.context.ThreadLocalContext;
 import org.joda.time.DateTime;
@@ -15,7 +16,7 @@ import java.util.UUID;
  * 
  * @author jtremeaux
  */
-public class AuthenticationTokenDao {
+public class AuthenticationTokenDao implements Dao<AuthenticationToken> {
     /**
      * Gets an authentication token.
      * 

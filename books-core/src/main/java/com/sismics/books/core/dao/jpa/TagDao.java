@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
+import com.sismics.books.core.interfaces.Dao;
 import com.sismics.books.core.dao.jpa.dto.TagDto;
 import com.sismics.books.core.model.jpa.UserBookTag;
 import com.sismics.books.core.model.jpa.Tag;
@@ -20,7 +21,7 @@ import com.sismics.util.context.ThreadLocalContext;
  * 
  * @author bgamard
  */
-public class TagDao {
+public class TagDao implements Dao<Tag> {
     /**
      * Gets a tag by its ID.
      * 

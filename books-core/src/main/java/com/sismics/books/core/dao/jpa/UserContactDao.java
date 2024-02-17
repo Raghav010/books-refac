@@ -12,6 +12,8 @@ import javax.persistence.Query;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+
+import com.sismics.books.core.interfaces.Dao;
 import com.sismics.books.core.dao.jpa.criteria.UserContactCriteria;
 import com.sismics.books.core.dao.jpa.dto.UserContactDto;
 import com.sismics.books.core.model.jpa.UserContact;
@@ -25,7 +27,7 @@ import com.sismics.util.context.ThreadLocalContext;
  * 
  * @author jtremeaux
  */
-public class UserContactDao {
+public class UserContactDao implements Dao<UserContact> {
     /**
      * Create a new contact.
      * 
