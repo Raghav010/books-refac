@@ -66,6 +66,7 @@ public class BookResource extends BaseResource {
     private void updateTags(UserBook userBook, List<String> tagList) throws JSONException {
         if (tagList != null) {
             TagDao tagDao = new TagDao();
+            UserBookTagDao userBookTagDao = new UserBookTagDao();
             Set<String> tagSet = new HashSet<>();
             Set<String> tagIdSet = new HashSet<>();
             List<Tag> tagDbList = tagDao.getByUserId(principal.getId());
@@ -78,7 +79,7 @@ public class BookResource extends BaseResource {
                 }
                 tagSet.add(tagId);
             }
-            tagDao.updateTagList(userBook.getId(), tagSet);
+            userBookTagDao.updateTagList(userBook.getId(), tagSet);
         }
     }
 
