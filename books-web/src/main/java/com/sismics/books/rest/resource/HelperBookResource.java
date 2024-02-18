@@ -203,14 +203,10 @@ public class HelperBookResource {
             ) throws JSONException {
 
         // Validate input data
-        System.out.println("First checkpoint");
         validateBookData(title, subtitle, author, description, isbn10, isbn13, pageCount, language, publishDateStr);
-        System.out.println("Second checkpoint");
 
         // Update the book
-        System.out.println("Third checkpoint");
         setBookAttributes(book, title, subtitle, author, description, isbn10, isbn13, pageCount, language, publishDateStr);
-        System.out.println("Fourth checkpoint");
     }
 
     /**

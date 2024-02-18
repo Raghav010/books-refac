@@ -85,7 +85,7 @@ public class BookResource extends BaseResource {
         }
     }
 
-    private UserBook getUserBook(Book book, UserBookDao userBookDao) {
+    private UserBook createUserBook(Book book, UserBookDao userBookDao) {
         UserBook userBook;
         userBook = new UserBook();
         userBook.setUserId(principal.getId());
@@ -94,6 +94,17 @@ public class BookResource extends BaseResource {
         userBookDao.create(userBook);
         return userBook;
     }
+
+    private UserBook getUserBook(String userBookId) throws JSONException {
+        UserBookDao userBookDao = new UserBookDao();
+        UserBook userBook = userBookDao.getUserBook(userBookId, principal.getId());
+        if (userBook == null) {
+            throw new ClientException("BookNotFound", "Book not found with id " + userBookId);
+        }
+
+        return userBook;
+    }
+
 
     /**
      * Creates a new book.
@@ -121,7 +132,7 @@ public class BookResource extends BaseResource {
         UserBookDao userBookDao = new UserBookDao();
         UserBook userBook = userBookDao.getByBook(book.getId(), principal.getId());
         if (userBook == null) {
-            userBook = getUserBook(book, userBookDao);
+            userBook = createUserBook(book, userBookDao);
         } else {
             throw new ClientException("BookAlreadyAdded", "Book already added");
         }
@@ -151,10 +162,7 @@ public class BookResource extends BaseResource {
 
         // Get the user book
         UserBookDao userBookDao = new UserBookDao();
-        UserBook userBook = userBookDao.getUserBook(userBookId, principal.getId());
-        if (userBook == null) {
-            throw new ClientException("BookNotFound", "Book not found with id " + userBookId);
-        }
+        UserBook userBook = getUserBook(userBookId);
 
         // Delete the user book
         userBookDao.delete(userBook.getId());
@@ -199,25 +207,10 @@ public class BookResource extends BaseResource {
 
         // Create the user book
         UserBookDao userBookDao = new UserBookDao();
-        UserBook userBook = getUserBook(book, userBookDao);
+        UserBook userBook = createUserBook(book, userBookDao);
 
         // Update tags
-        if (tagList != null) {
-            TagDao tagDao = new TagDao();
-            Set<String> tagSet = new HashSet<>();
-            Set<String> tagIdSet = new HashSet<>();
-            List<Tag> tagDbList = tagDao.getByUserId(principal.getId());
-            for (Tag tagDb : tagDbList) {
-                tagIdSet.add(tagDb.getId());
-            }
-            for (String tagId : tagList) {
-                if (!tagIdSet.contains(tagId)) {
-                    throw new ClientException("TagNotFound", MessageFormat.format("Tag not found: {0}", tagId));
-                }
-                tagSet.add(tagId);
-            }
-            tagDao.updateTagList(userBook.getId(), tagSet);
-        }
+        updateTags(userBook, tagList);
 
         System.out.println("Added Book Manually!!");
 
@@ -255,13 +248,9 @@ public class BookResource extends BaseResource {
         }
 
         // Get the user book
-        UserBookDao userBookDao = new UserBookDao();
-        BookDao bookDao = new BookDao();
-        UserBook userBook = userBookDao.getUserBook(userBookId, principal.getId());
-        if (userBook == null) {
-            throw new ClientException("BookNotFound", "Book not found with id " + userBookId);
-        }
+        UserBook userBook = getUserBook(userBookId);
 
+        BookDao bookDao = new BookDao();
         // Get the book
         Book book = bookDao.getById(userBook.getBookId());
 
@@ -284,22 +273,7 @@ public class BookResource extends BaseResource {
         helperBookResource.update(book, title, subtitle, author, description, isbn10, isbn13, pageCount, language, publishDateStr);
 
         // Update tags
-        if (tagList != null) {
-            TagDao tagDao = new TagDao();
-            Set<String> tagSet = new HashSet<>();
-            Set<String> tagIdSet = new HashSet<>();
-            List<Tag> tagDbList = tagDao.getByUserId(principal.getId());
-            for (Tag tagDb : tagDbList) {
-                tagIdSet.add(tagDb.getId());
-            }
-            for (String tagId : tagList) {
-                if (!tagIdSet.contains(tagId)) {
-                    throw new ClientException("TagNotFound", MessageFormat.format("Tag not found: {0}", tagId));
-                }
-                tagSet.add(tagId);
-            }
-            tagDao.updateTagList(userBookId, tagSet);
-        }
+        updateTags(userBook, tagList);
 
         // Returns the book ID
         JSONObject response = new JSONObject();
@@ -324,11 +298,7 @@ public class BookResource extends BaseResource {
         }
 
         // Fetch the user book
-        UserBookDao userBookDao = new UserBookDao();
-        UserBook userBook = userBookDao.getUserBook(userBookId, principal.getId());
-        if (userBook == null) {
-            throw new ClientException("BookNotFound", "Book not found with id " + userBookId);
-        }
+        UserBook userBook = getUserBook(userBookId);
 
         // Fetch the book
         BookDao bookDao = new BookDao();
@@ -408,11 +378,7 @@ public class BookResource extends BaseResource {
         }
 
         // Get the user book
-        UserBookDao userBookDao = new UserBookDao();
-        UserBook userBook = userBookDao.getUserBook(userBookId, principal.getId());
-        if (userBook == null) {
-            throw new ClientException("BookNotFound", "Book not found with id " + userBookId);
-        }
+        UserBook userBook = getUserBook(userBookId);
 
         // Get the book
         BookDao bookDao = new BookDao();
