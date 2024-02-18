@@ -29,7 +29,7 @@ import com.sismics.rest.util.ValidationUtil;
 public class HelperBookResource {
 
     // Validate the Book data
-    private void validateBookData(
+    public void validateBookData(
             String title,
             String subtitle,
             String author,
@@ -41,14 +41,14 @@ public class HelperBookResource {
             String publishDateStr) throws JSONException {
 
         // Validate input data
-        title = ValidationUtil.validateLength(title, "title", 1, 255, false);
+        title = ValidationUtil.validateLength(title, "title", 1, 255, true);
         subtitle = ValidationUtil.validateLength(subtitle, "subtitle", 1, 255, true);
-        author = ValidationUtil.validateLength(author, "author", 1, 255, false);
+        author = ValidationUtil.validateLength(author, "author", 1, 255, true);
         description = ValidationUtil.validateLength(description, "description", 1, 4000, true);
         isbn10 = ValidationUtil.validateLength(isbn10, "isbn10", 10, 10, true);
         isbn13 = ValidationUtil.validateLength(isbn13, "isbn13", 13, 13, true);
         language = ValidationUtil.validateLength(language, "language", 2, 2, true);
-        Date publishDate = ValidationUtil.validateDate(publishDateStr, "publish_date", false);
+        Date publishDate = ValidationUtil.validateDate(publishDateStr, "publish_date", true);
     }
 
     private void setBookAttributes(Book book,
@@ -62,7 +62,7 @@ public class HelperBookResource {
                                    String language,
                                    String publishDateStr) throws JSONException {
 
-        Date publishDate = ValidationUtil.validateDate(publishDateStr, "publish_date", false);
+        Date publishDate = ValidationUtil.validateDate(publishDateStr, "publish_date", true);
 
         if (title != null) {
             book.setTitle(title);
@@ -144,7 +144,19 @@ public class HelperBookResource {
             List<String> tagList) throws JSONException {
 
         // Validate input data
+        System.out.println("First checkpoint");
+        if(title == null) {
+            throw new ClientException("ValidationError", "Title cannot be empty");
+        }
+        if(author == null) {
+            throw new ClientException("ValidationError", "Author cannot be empty");
+        }
+        if(publishDateStr == null) {
+            throw new ClientException("ValidationError", "Publish Date cannot be empty");
+        }
+
         validateBookData(title, subtitle, author, description, isbn10, isbn13, pageCount, language, publishDateStr);
+        System.out.println("Second checkpoint");
 
         if (Strings.isNullOrEmpty(isbn10) && Strings.isNullOrEmpty(isbn13)) {
             throw new ClientException("ValidationError", "At least one ISBN number is mandatory");
@@ -177,12 +189,8 @@ public class HelperBookResource {
      * @return Response
      * @throws JSONException
      */
-    @POST
-    @Path("{id: [a-z0-9\\-]+}")
-    @Produces(MediaType.APPLICATION_JSON)
     public void update(
-
-            String userBookId,
+            Book book,
             String title,
             String subtitle,
             String author,
@@ -195,11 +203,14 @@ public class HelperBookResource {
             ) throws JSONException {
 
         // Validate input data
+        System.out.println("First checkpoint");
         validateBookData(title, subtitle, author, description, isbn10, isbn13, pageCount, language, publishDateStr);
+        System.out.println("Second checkpoint");
 
         // Update the book
-//        setBookAttributes(book, title, subtitle, author, description, isbn10, isbn13, pageCount, language, publishDateStr);
-
+        System.out.println("Third checkpoint");
+        setBookAttributes(book, title, subtitle, author, description, isbn10, isbn13, pageCount, language, publishDateStr);
+        System.out.println("Fourth checkpoint");
     }
 
     /**
