@@ -50,6 +50,11 @@ import com.sismics.util.filter.TokenBasedSecurityFilter;
 @Path("/user")
 public class UserResource extends ExtendedBaseResource {
     /**
+     * Administrator's default password ("admin").
+     */
+    private static final String DEFAULT_ADMIN_PASSWORD = "$2a$05$6Ny3TjrW3aVAL1or2SlcR.fhuDgPKp5jp.P9fBXwVNePgeLqb4i3C";
+    
+    /**
      * Creates a new user.
      * 
      * @param username User's username
@@ -429,7 +434,7 @@ public class UserResource extends ExtendedBaseResource {
             UserDao userDao = new UserDao();
             User adminUser = userDao.getById("admin");
             if (adminUser != null && adminUser.getDeleteDate() == null) {
-                response.put("is_default_password", Constants.DEFAULT_ADMIN_PASSWORD.equals(adminUser.getPassword()));
+                response.put("is_default_password", DEFAULT_ADMIN_PASSWORD.equals(adminUser.getPassword()));
             }
         } else {
             response.put("anonymous", false);
@@ -442,7 +447,7 @@ public class UserResource extends ExtendedBaseResource {
             response.put("first_connection", user.isFirstConnection());
             JSONArray baseFunctions = new JSONArray(((UserPrincipal) principal).getBaseFunctionSet());
             response.put("base_functions", baseFunctions);
-            response.put("is_default_password", hasBaseFunction(BaseFunction.ADMIN) && Constants.DEFAULT_ADMIN_PASSWORD.equals(user.getPassword()));
+            response.put("is_default_password", hasBaseFunction(BaseFunction.ADMIN) && DEFAULT_ADMIN_PASSWORD.equals(user.getPassword()));
         }
         
         return Response.ok().entity(response).build();
