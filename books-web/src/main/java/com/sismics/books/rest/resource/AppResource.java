@@ -39,7 +39,7 @@ import com.sismics.util.log4j.MemoryAppender;
  * @author jtremeaux
  */
 @Path("/app")
-public class AppResource extends BaseResource {
+public class AppResource extends ExtendedBaseResource {
     /**
      * Return the information about the application.
      * 
