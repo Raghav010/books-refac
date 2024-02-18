@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.sismics.books.core.dao.jpa.UserBookTagDao;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -60,6 +61,7 @@ public class BookImportAsyncListener {
                 BookDao bookDao = new BookDao();
                 UserBookDao userBookDao = new UserBookDao();
                 TagDao tagDao = new TagDao();
+                UserBookTagDao userBookTagDao = new UserBookTagDao();
                 try {
                     reader = new CSVReader(new FileReader(bookImportedEvent.getImportFile()));
                 } catch (FileNotFoundException e) {
@@ -137,11 +139,11 @@ public class BookImportAsyncListener {
                         
                         // Add tags to the user book
                         if (tagIdSet.size() > 0) {
-                            List<TagDto> tagDtoList = tagDao.getByUserBookId(userBook.getId());
+                            List<TagDto> tagDtoList = userBookTagDao.getByUserBookId(userBook.getId());
                             for (TagDto tagDto : tagDtoList) {
                                 tagIdSet.add(tagDto.getId());
                             }
-                            tagDao.updateTagList(userBook.getId(), tagIdSet);
+                            userBookTagDao.updateTagList(userBook.getId(), tagIdSet);
                         }
                         
                         TransactionUtil.commit();
