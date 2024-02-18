@@ -1,17 +1,16 @@
 package com.sismics.books.core.dao.jpa;
 
-import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
+
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
-import com.sismics.books.core.dao.jpa.dto.TagDto;
-import com.sismics.books.core.model.jpa.UserBookTag;
+
 import com.sismics.books.core.model.jpa.Tag;
 import com.sismics.util.context.ThreadLocalContext;
 
@@ -49,60 +48,6 @@ public class TagDao {
         return q.getResultList();
     }
 
-    /**
-     * Update tags on a user book.
-     * 
-     * @param userBookId
-     * @param tagIdSet
-     */
-    public void updateTagList(String userBookId, Set<String> tagIdSet) {
-        // Delete old tag links
-        EntityManager em = ThreadLocalContext.get().getEntityManager();
-        Query q = em.createQuery("delete UserBookTag bt where bt.userBookId = :userBookId");
-        q.setParameter("userBookId", userBookId);
-        q.executeUpdate();
-        
-        // Create new tag links
-        for (String tagId : tagIdSet) {
-            UserBookTag userBookTag = new UserBookTag();
-            userBookTag.setId(UUID.randomUUID().toString());
-            userBookTag.setUserBookId(userBookId);
-            userBookTag.setTagId(tagId);
-            em.persist(userBookTag);
-        }
-
-    }
-
-    /**
-     * Returns tag list on a user book.
-     * @param userBookId
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public List<TagDto> getByUserBookId(String userBookId) {
-        EntityManager em = ThreadLocalContext.get().getEntityManager();
-        StringBuilder sb = new StringBuilder("select t.TAG_ID_C, t.TAG_NAME_C, t.TAG_COLOR_C from T_USER_BOOK_TAG bt ");
-        sb.append(" join T_TAG t on t.TAG_ID_C = bt.BOT_IDTAG_C ");
-        sb.append(" where bt.BOT_IDUSERBOOK_C = :userBookId and t.TAG_DELETEDATE_D is null ");
-        sb.append(" order by t.TAG_NAME_C ");
-        
-        // Perform the query
-        Query q = em.createNativeQuery(sb.toString());
-        q.setParameter("userBookId", userBookId);
-        List<Object[]> l = q.getResultList();
-        
-        // Assemble results
-        List<TagDto> tagDtoList = new ArrayList<TagDto>();
-        for (Object[] o : l) {
-            int i = 0;
-            TagDto tagDto = new TagDto();
-            tagDto.setId((String) o[i++]);
-            tagDto.setName((String) o[i++]);
-            tagDto.setColor((String) o[i++]);
-            tagDtoList.add(tagDto);
-        }
-        return tagDtoList;
-    }
     
     /**
      * Creates a new tag.
@@ -176,10 +121,8 @@ public class TagDao {
         Date dateNow = new Date();
         tagDb.setDeleteDate(dateNow);
 
-        // Delete linked data
-        q = em.createQuery("delete UserBookTag bt where bt.tagId = :tagId");
-        q.setParameter("tagId", tagId);
-        q.executeUpdate();
+        UserBookTagDao UBTagDao = new UserBookTagDao();
+        UBTagDao.delete(tagId);
     }
 
     /**

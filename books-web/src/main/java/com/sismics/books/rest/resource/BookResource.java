@@ -28,16 +28,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.sismics.books.core.dao.jpa.*;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.sismics.books.core.dao.jpa.BookDao;
-import com.sismics.books.core.dao.jpa.TagDao;
-import com.sismics.books.core.dao.jpa.UserBookDao;
-import com.sismics.books.core.dao.jpa.UserDao;
 import com.sismics.books.core.dao.jpa.criteria.UserBookCriteria;
 import com.sismics.books.core.dao.jpa.dto.TagDto;
 import com.sismics.books.core.dao.jpa.dto.UserBookDto;
@@ -310,8 +307,8 @@ public class BookResource extends BaseResource {
         helperBookResource.putDetails(book, userBook, bookDb);
 
         // Add tags
-        TagDao tagDao = new TagDao();
-        List<TagDto> tagDtoList = tagDao.getByUserBookId(userBookId);
+        UserBookTagDao userBookTagDao = new UserBookTagDao();
+        List<TagDto> tagDtoList = userBookTagDao.getByUserBookId(userBookId);
         List<JSONObject> tags = new ArrayList<>();
         for (TagDto tagDto : tagDtoList) {
             JSONObject tag = new JSONObject();
@@ -425,6 +422,7 @@ public class BookResource extends BaseResource {
 
         UserBookDao userBookDao = new UserBookDao();
         TagDao tagDao = new TagDao();
+        UserBookTagDao userBookTagDao = new UserBookTagDao();
         PaginatedList<UserBookDto> paginatedList = PaginatedLists.create(limit, offset);
         SortCriteria sortCriteria = new SortCriteria(sortColumn, asc);
         UserBookCriteria criteria = new UserBookCriteria();
@@ -455,7 +453,7 @@ public class BookResource extends BaseResource {
             book.put("read_date", userBookDto.getReadTimestamp());
 
             // Get tags
-            List<TagDto> tagDtoList = tagDao.getByUserBookId(userBookDto.getId());
+            List<TagDto> tagDtoList = userBookTagDao.getByUserBookId(userBookDto.getId());
             List<JSONObject> tags = new ArrayList<>();
             for (TagDto tagDto : tagDtoList) {
                 JSONObject tag = new JSONObject();
