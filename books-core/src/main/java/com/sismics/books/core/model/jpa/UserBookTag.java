@@ -118,33 +118,6 @@ public class UserBookTag implements Serializable {
         return java.util.Objects.equals(userBookId, other.userBookId) && java.util.Objects.equals(tagId, other.tagId);
     }
 
-//    public boolean equals(Object obj) {
-//        if (this == obj) {
-//            return true;
-//        }
-//        if (obj == null) {
-//            return false;
-//        }
-//        if (getClass() != obj.getClass()) {
-//            return false;
-//        }
-//        UserBookTag other = (UserBookTag) obj;
-//        if (userBookId == null) {
-//            if (other.userBookId != null) {
-//                return false;
-//            }
-//        } else if (!userBookId.equals(other.userBookId)) {
-//            return false;
-//        }
-//        if (tagId == null) {
-//            if (other.tagId != null) {
-//                return false;
-//            }
-//        } else if (!tagId.equals(other.tagId)) {
-//            return false;
-//        }
-//        return true;
-//    }
 
     @Override
     public String toString() {

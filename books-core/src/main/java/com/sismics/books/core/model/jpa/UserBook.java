@@ -184,29 +184,15 @@ public class UserBook implements Serializable {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
+
         UserBook other = (UserBook) obj;
-        if (bookId == null) {
-            if (other.bookId != null) {
-                return false;
-            }
-        } else if (!bookId.equals(other.bookId)) {
-            return false;
-        }
-        if (userId == null) {
-            if (other.userId != null) {
-                return false;
-            }
-        } else if (!userId.equals(other.userId)) {
-            return false;
-        }
-        return true;
+
+        return java.util.Objects.equals(bookId, other.bookId) && java.util.Objects.equals(userId, other.userId);
     }
+
 
     @Override
     public String toString() {
