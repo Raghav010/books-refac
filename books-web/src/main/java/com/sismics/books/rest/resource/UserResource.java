@@ -24,7 +24,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import com.sismics.books.core.constant.Constants;
+import com.sismics.books.rest.resource.UserResourceHelper;
 import com.sismics.books.core.dao.jpa.AuthenticationTokenDao;
 import com.sismics.books.core.dao.jpa.RoleBaseFunctionDao;
 import com.sismics.books.core.dao.jpa.UserDao;
@@ -85,13 +85,7 @@ public class UserResource extends ExtendedBaseResource {
         ValidationUtil.validateEmail(email, "email");
         
         // Create the user
-        User user = new User();
-        user.setRoleId(Constants.DEFAULT_USER_ROLE);
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setEmail(email);
-        user.setCreateDate(new Date());
-        user.setLocaleId(Constants.DEFAULT_LOCALE_ID);
+        User user = UserResourceHelper.createUser(new UserDto(null, password, username, email, null));
         
         // Create the user
         UserDao userDao = new UserDao();
