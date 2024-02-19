@@ -220,8 +220,7 @@ public class BookDataService extends AbstractIdleService {
         connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36");
         connection.setConnectTimeout(10000);
         connection.setReadTimeout(10000);
-        InputStream inputStream = connection.getInputStream();
-        return inputStream;
+        return connection.getInputStream();
     }
 
     /**
