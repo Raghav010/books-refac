@@ -519,6 +519,18 @@ public class UserResource extends ExtendedBaseResource {
         
         return Response.ok().entity(response).build();
     }
+
+    public String getSessionToken() {
+        String authToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (TokenBasedSecurityFilter.COOKIE_NAME.equals(cookie.getName())) {
+                    authToken = cookie.getValue();
+                }
+            }
+        }
+        return authToken;
+    }
     
     /**
      * Returns all active sessions.
@@ -535,14 +547,7 @@ public class UserResource extends ExtendedBaseResource {
         }
         
         // Get the value of the session token
-        String authToken = null;
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (TokenBasedSecurityFilter.COOKIE_NAME.equals(cookie.getName())) {
-                    authToken = cookie.getValue();
-                }
-            }
-        }
+        String authToken = getSessionToken();
         
         JSONObject response = new JSONObject();
         List<JSONObject> sessions = new ArrayList<>();
@@ -578,14 +583,7 @@ public class UserResource extends ExtendedBaseResource {
         }
         
         // Get the value of the session token
-        String authToken = null;
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (TokenBasedSecurityFilter.COOKIE_NAME.equals(cookie.getName())) {
-                    authToken = cookie.getValue();
-                }
-            }
-        }
+        String authToken = getSessionToken();
         
         // Remove other tokens
         AuthenticationTokenDao authenticationTokenDao = new AuthenticationTokenDao();
