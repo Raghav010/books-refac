@@ -258,7 +258,7 @@ public class UserResource extends ExtendedBaseResource {
     /**
      * This resource is used to authenticate the user and create a user ession.
      * The "session" is only used to identify the user, no other data is stored in the session.
-     * 
+     *
      * @param username Username
      * @param password Password
      * @param longLasted Remember the user next time, create a long lasted session.
@@ -271,7 +271,7 @@ public class UserResource extends ExtendedBaseResource {
         @FormParam("username") String username,
         @FormParam("password") String password,
         @FormParam("remember") boolean longLasted) throws JSONException {
-        
+
         // Validate the input data
         username = StringUtils.strip(username);
         password = StringUtils.strip(password);
@@ -282,14 +282,14 @@ public class UserResource extends ExtendedBaseResource {
         if (userId == null) {
             throw new ForbiddenClientException();
         }
-            
+
         // Create a new session token
         AuthenticationTokenDao authenticationTokenDao = new AuthenticationTokenDao();
         AuthenticationToken authenticationToken = new AuthenticationToken();
         authenticationToken.setUserId(userId);
         authenticationToken.setLongLasted(longLasted);
         String token = authenticationTokenDao.create(authenticationToken);
-        
+
         // Cleanup old session tokens
         authenticationTokenDao.deleteOldSessionToken(userId);
 
