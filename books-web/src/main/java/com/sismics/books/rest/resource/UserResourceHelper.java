@@ -30,15 +30,25 @@ public class UserResourceHelper {
          * themeId = id
          */
 
-        // String email = userDto.getEmail();
-        // if (email != null) {
-        //     userDto.setEmail(ValidationUtil.validateLength(email, "email", Constants.MIN_EMAIL_LEN, Constants.MAX_EMAIL_LEN, Constants.EMAIL_NULLABLE));
-        // }
+        String email = userDto.getEmail();
+        if (email != null) {
+            userDto.setEmail(ValidationUtil.validateLength(email, "email", Constants.MIN_EMAIL_LEN, Constants.MAX_EMAIL_LEN, Constants.EMAIL_NULLABLE));
+        }
 
-        // String password = userDto.getPassword();
-        // if (password != null) {
-        //     userDto.setPassword(ValidationUtil.validateLength(password, "password", Constants.MIN_PWD_LEN, Constants.MAX_PWD_LEN, Constants.PWD_NULLABLE));
-        // }
+        String password = userDto.getUsername();
+        if (password != null) {
+            userDto.setUsername(ValidationUtil.validateLength(password, "password", Constants.MIN_PWD_LEN, Constants.MAX_PWD_LEN, Constants.PWD_NULLABLE));
+        }
+
+        String localeId = userDto.getLocaleId();
+        if (localeId != null) {
+            userDto.setLocaleId(ValidationUtil.validateLocale(localeId, "locale", Constants.LOCALE_ID_NULLABLE));
+        }
+
+        String themeId = userDto.getId();
+        if (themeId != null) {
+            userDto.setId(ValidationUtil.validateLength(themeId, "themeId", 0, 50, Constants.THEME_ID_NULLABLE));
+        }
 
         return userDto;
     }

@@ -132,22 +132,19 @@ public class UserResource extends ExtendedBaseResource {
         }
         
         // Validate the input data
-        password = ValidationUtil.validateLength(password, "password", Constants.MIN_PWD_LEN, Constants.MAX_PWD_LEN, Constants.PWD_NULLABLE);
-        email = ValidationUtil.validateLength(email, "email", Constants.MIN_EMAIL_LEN, Constants.MAX_EMAIL_LEN, Constants.EMAIL_NULLABLE);
-        localeId = ValidationUtil.validateLocale(localeId, "locale", Constants.LOCALE_ID_NULLABLE);
-        themeId = ValidationUtil.validateTheme(themeId, "theme", Constants.THEME_ID_NULLABLE);
-        
+        UserDto newDetails = UserResourceHelper.validateUserDto(new UserDto(themeId, localeId, password, email, null));
+
         // Update the user
         UserDao userDao = new UserDao();
         User user = userDao.getActiveByUsername(principal.getName());
         if (email != null) {
-            user.setEmail(email);
+            user.setEmail(newDetails.getEmail());
         }
         if (themeId != null) {
-            user.setTheme(themeId);
+            user.setTheme(newDetails.getId());
         }
         if (localeId != null) {
-            user.setLocaleId(localeId);
+            user.setLocaleId(newDetails.getLocaleId());
         }
         if (firstConnection != null && hasBaseFunction(BaseFunction.ADMIN)) {
             user.setFirstConnection(firstConnection);
@@ -155,8 +152,8 @@ public class UserResource extends ExtendedBaseResource {
         
         user = userDao.update(user);
         
-        if (StringUtils.isNotBlank(password)) {
-            user.setPassword(password);
+        if (StringUtils.isNotBlank(newDetails.getUsername())) {
+            user.setPassword(newDetails.getUsername());
             userDao.updatePassword(user);
         }
         
