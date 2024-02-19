@@ -28,6 +28,18 @@ import com.sismics.rest.util.ValidationUtil;
 
 public class HelperBookResource {
 
+    // MIN_HEADER_LENGTH defines minimum length of title, subtitle and author
+    private static final int MIN_HEADER_LENGTH = 1;
+
+    // MAX_HEADER_LENGTH defines maximum length of title, subtitle and author
+    private static final int MAX_HEADER_LENGTH = 255;
+
+    // minimum length of description
+    private static final int MIN_DESC_LENGTH = 1;
+
+    // maximum length of description
+    private static final int MAX_DESC_LENGTH = 4000;
+
     // Validate the Book data
     public void validateBookData(
             String title,
@@ -41,10 +53,10 @@ public class HelperBookResource {
             String publishDateStr) throws JSONException {
 
         // Validate input data
-        title = ValidationUtil.validateLength(title, "title", 1, 255, true);
-        subtitle = ValidationUtil.validateLength(subtitle, "subtitle", 1, 255, true);
-        author = ValidationUtil.validateLength(author, "author", 1, 255, true);
-        description = ValidationUtil.validateLength(description, "description", 1, 4000, true);
+        title = ValidationUtil.validateLength(title, "title", MIN_HEADER_LENGTH, MAX_HEADER_LENGTH, true);
+        subtitle = ValidationUtil.validateLength(subtitle, "subtitle", MIN_HEADER_LENGTH, MAX_HEADER_LENGTH, true);
+        author = ValidationUtil.validateLength(author, "author", MIN_HEADER_LENGTH, MAX_HEADER_LENGTH, true);
+        description = ValidationUtil.validateLength(description, "description", MIN_DESC_LENGTH, MAX_DESC_LENGTH, true);
         isbn10 = ValidationUtil.validateLength(isbn10, "isbn10", 10, 10, true);
         isbn13 = ValidationUtil.validateLength(isbn13, "isbn13", 13, 13, true);
         language = ValidationUtil.validateLength(language, "language", 2, 2, true);

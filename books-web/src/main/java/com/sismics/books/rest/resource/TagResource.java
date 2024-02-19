@@ -32,6 +32,12 @@ import com.sismics.rest.util.ValidationUtil;
  */
 @Path("/tag")
 public class TagResource extends BaseResource {
+    // min length of tag name
+    private static final int MIN_LENGTH_NAME = 1;
+
+    // max length of tag name
+    private static final int MAX_LENGTH_NAME = 36;
+
     /**
      * Returns the list of all tags.
      * 
@@ -78,7 +84,7 @@ public class TagResource extends BaseResource {
         }
         
         // Validate input data
-        name = ValidationUtil.validateLength(name, "name", 1, 36, false);
+        name = ValidationUtil.validateLength(name, "name", MIN_LENGTH_NAME, MAX_LENGTH_NAME, false);
         ValidationUtil.validateHexColor(color, "color", true);
         
         // Don't allow spaces
@@ -124,7 +130,7 @@ public class TagResource extends BaseResource {
         }
         
         // Validate input data
-        name = ValidationUtil.validateLength(name, "name", 1, 36, true);
+        name = ValidationUtil.validateLength(name, "name", MIN_LENGTH_NAME, MAX_LENGTH_NAME, true);
         ValidationUtil.validateHexColor(color, "color", true);
         
         // Don't allow spaces
