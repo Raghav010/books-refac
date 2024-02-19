@@ -22,13 +22,13 @@ public class UserResourceHelper {
         return user;
     }
 
+    /*
+     * email = email
+     * password = username
+     * localeId = localeId
+     * themeId = id
+     */
     public static UserDto validateUserDto(UserDto userDto) throws JSONException {
-        /*
-         * email = email
-         * password = username
-         * localeId = localeId
-         * themeId = id
-         */
 
         String email = userDto.getEmail();
         if (email != null) {

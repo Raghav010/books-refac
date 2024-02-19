@@ -137,13 +137,13 @@ public class UserResource extends ExtendedBaseResource {
         // Update the user
         UserDao userDao = new UserDao();
         User user = userDao.getActiveByUsername(principal.getName());
-        if (email != null) {
+        if (newDetails.getEmail() != null) {
             user.setEmail(newDetails.getEmail());
         }
-        if (themeId != null) {
+        if (newDetails.getId() != null) {
             user.setTheme(newDetails.getId());
         }
-        if (localeId != null) {
+        if (newDetails.getLocaleId() != null) {
             user.setLocaleId(newDetails.getLocaleId());
         }
         if (firstConnection != null && hasBaseFunction(BaseFunction.ADMIN)) {
@@ -190,11 +190,8 @@ public class UserResource extends ExtendedBaseResource {
         checkBaseFunction(BaseFunction.ADMIN);
         
         // Validate the input data
-        password = ValidationUtil.validateLength(password, "password", 8, 50, true);
-        email = ValidationUtil.validateLength(email, "email", null, 100, true);
-        localeId = ValidationUtil.validateLocale(localeId, "locale", true);
-        themeId = ValidationUtil.validateTheme(themeId, "theme", true);
-        
+        UserDto newDetails = UserResourceHelper.validateUserDto(new UserDto(themeId, localeId, password, email, null));
+
         // Check if the user exists
         UserDao userDao = new UserDao();
         User user = userDao.getActiveByUsername(username);
@@ -203,21 +200,21 @@ public class UserResource extends ExtendedBaseResource {
         }
 
         // Update the user
-        if (email != null) {
-            user.setEmail(email);
+        if (newDetails.getEmail() != null) {
+            user.setEmail(newDetails.getEmail());
         }
-        if (themeId != null) {
-            user.setTheme(themeId);
+        if (newDetails.getId() != null) {
+            user.setTheme(newDetails.getId());
         }
-        if (localeId != null) {
-            user.setLocaleId(localeId);
+        if (newDetails.getLocaleId() != null) {
+            user.setLocaleId(newDetails.getLocaleId());
         }
         
         user = userDao.update(user);
         
-        if (StringUtils.isNotBlank(password)) {
+        if (StringUtils.isNotBlank(newDetails.getUsername())) {
             // Change the password
-            user.setPassword(password);
+            user.setPassword(newDetails.getUsername());
             userDao.updatePassword(user);
         }
         
