@@ -40,6 +40,12 @@ public class BookImportAsyncListener {
      * Logger.
      */
     private static final Logger log = LoggerFactory.getLogger(BookImportAsyncListener.class);
+    private static final int isbn10Field = 6;
+    private static final int bookIdField = 0;
+    private static final int isbn13Field = 5;
+    private static final int readDateField = 14;
+    private static final int createDateField = 15;
+    private static final int tagsField = 16;
 
     /**
      * Process the event.
@@ -52,100 +58,41 @@ public class BookImportAsyncListener {
         if (log.isInfoEnabled()) {
             log.info(MessageFormat.format("Books import requested event: {0}", bookImportedEvent.toString()));
         }
-        
+
         // Create books and tags
         TransactionUtil.handle(new Runnable() {
             @Override
             public void run() {
                 CSVReader reader = null;
-                BookDao bookDao = new BookDao();
-                UserBookDao userBookDao = new UserBookDao();
-                TagDao tagDao = new TagDao();
-                UserBookTagDao userBookTagDao = new UserBookTagDao();
                 try {
                     reader = new CSVReader(new FileReader(bookImportedEvent.getImportFile()));
                 } catch (FileNotFoundException e) {
                     log.error("Unable to read CSV file", e);
                 }
-                
-                // Goodreads date format
-                DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy/MM/dd");
-                
+
+
+
                 String [] line;
                 try {
+
                     while ((line = reader.readNext()) != null) {
-                        if (line[0].equals("Book Id")) {
+                        if (line[bookIdField].equals("Book Id")) {
                             // Skip header
                             continue;
                         }
-                        
+
                         // Retrieve ISBN number
-                        String isbn = Strings.isNullOrEmpty(line[6]) ? line[5] : line[6];
+                        String isbn = Strings.isNullOrEmpty(line[isbn10Field]) ? line[isbn13Field] : line[isbn10Field];
                         if (Strings.isNullOrEmpty(isbn)) {
-                            log.warn("No ISBN number for Goodreads book ID: " + line[0]);
+                            log.warn("No ISBN number for Goodreads book ID: " + line[bookIdField]);
                             continue;
                         }
-                        
-                        // Fetch the book from database if it exists
-                        Book book = bookDao.getByIsbn(isbn);
-                        if (book == null) {
-                            // Try to get the book from a public API
-                            try {
-                                book = AppContext.getInstance().getBookDataService().searchBook(isbn);
-                            } catch (Exception e) {
-                                continue;
-                            }
-                            
-                            // Save the new book in database
-                            bookDao.create(book);
-                        }
-                        
-                        // Create a new user book if needed
-                        UserBook userBook = userBookDao.getByBook(book.getId(), bookImportedEvent.getUser().getId());
-                        if (userBook == null) {
-                            userBook = new UserBook();
-                            userBook.setUserId(bookImportedEvent.getUser().getId());
-                            userBook.setBookId(book.getId());
-                            userBook.setCreateDate(new Date());
-                            if (!Strings.isNullOrEmpty(line[14])) {
-                                userBook.setReadDate(formatter.parseDateTime(line[14]).toDate());
-                            }
-                            if (!Strings.isNullOrEmpty(line[15])) {
-                                userBook.setCreateDate(formatter.parseDateTime(line[15]).toDate());
-                            }
-                            userBookDao.create(userBook);
-                        }
-                        
-                        // Create tags
-                        String[] bookshelfArray = line[16].split(",");
-                        Set<String> tagIdSet = new HashSet<String>();
-                        for (String bookshelf : bookshelfArray) {
-                            bookshelf = bookshelf.trim();
-                            if (Strings.isNullOrEmpty(bookshelf)) {
-                                continue;
-                            }
-                            
-                            Tag tag = tagDao.getByName(bookImportedEvent.getUser().getId(), bookshelf);
-                            if (tag == null) {
-                                tag = new Tag();
-                                tag.setName(bookshelf);
-                                tag.setColor(MathUtil.randomHexColor());
-                                tag.setUserId(bookImportedEvent.getUser().getId());
-                                tagDao.create(tag);
-                            }
-                            
-                            tagIdSet.add(tag.getId());
-                        }
-                        
-                        // Add tags to the user book
-                        if (tagIdSet.size() > 0) {
-                            List<TagDto> tagDtoList = userBookTagDao.getByUserBookId(userBook.getId());
-                            for (TagDto tagDto : tagDtoList) {
-                                tagIdSet.add(tagDto.getId());
-                            }
-                            userBookTagDao.updateTagList(userBook.getId(), tagIdSet);
-                        }
-                        
+
+                        Book book = getOrCreateBook(isbn);
+                        UserBook userBook = getOrCreateUserBook(book.getId(),bookImportedEvent.getUser().getId(),line);
+                        Set<String> tagIdSet = createTags(line,bookImportedEvent.getUser().getId());
+                        createUserBookTags(tagIdSet, userBook.getId());
+
                         TransactionUtil.commit();
                     }
                 } catch (Exception e) {
@@ -154,4 +101,88 @@ public class BookImportAsyncListener {
             }
         });
     }
+
+    private Book getOrCreateBook(String isbn) throws Exception{
+        BookDao bookDao = new BookDao();
+        // Fetch the book from database if it exists
+        Book book = bookDao.getByIsbn(isbn);
+        if (book == null) {
+            // Try to get the book from a public API
+            try {
+                book = AppContext.getInstance().getBookDataService().searchBook(isbn);
+            } catch (Exception e) {
+                throw e;
+            }
+
+            // Save the new book in database
+            bookDao.create(book);
+        }
+        return book;
+    }
+
+    private UserBook getOrCreateUserBook(String bookId,String userId, String[] line){
+        UserBookDao userBookDao = new UserBookDao();
+
+        // Goodreads date format
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy/MM/dd");
+
+        // Create a new user book if needed
+        UserBook userBook = userBookDao.getByBook(bookId, userId);
+        if (userBook == null) {
+            userBook = new UserBook();
+            userBook.setUserId(userId);
+            userBook.setBookId(bookId);
+            userBook.setCreateDate(new Date());
+            if (!Strings.isNullOrEmpty(line[readDateField])) {
+                userBook.setReadDate(formatter.parseDateTime(line[readDateField]).toDate());
+            }
+            if (!Strings.isNullOrEmpty(line[createDateField])) {
+                userBook.setCreateDate(formatter.parseDateTime(line[createDateField]).toDate());
+            }
+            userBookDao.create(userBook);
+        }
+        return userBook;
+    }
+
+    private Set<String> createTags(String[] line, String userId){
+        TagDao tagDao = new TagDao();
+
+        // Create tags
+        String[] bookshelfArray = line[tagsField].split(",");
+        Set<String> tagIdSet = new HashSet<String>();
+        for (String bookshelf : bookshelfArray) {
+            bookshelf = bookshelf.trim();
+            if (Strings.isNullOrEmpty(bookshelf)) {
+                continue;
+            }
+
+            Tag tag = tagDao.getByName(userId, bookshelf);
+            if (tag == null) {
+                tag = new Tag();
+                tag.setName(bookshelf);
+                tag.setColor(MathUtil.randomHexColor());
+                tag.setUserId(userId);
+                tagDao.create(tag);
+            }
+
+            tagIdSet.add(tag.getId());
+        }
+
+        return tagIdSet;
+    }
+
+    private void createUserBookTags(Set<String> tagIdSet, String userBookId){
+        UserBookTagDao userBookTagDao = new UserBookTagDao();
+
+        // Add tags to the user book
+        if (tagIdSet.size() > bookIdField) {
+            List<TagDto> tagDtoList = userBookTagDao.getByUserBookId(userBookId);
+            for (TagDto tagDto : tagDtoList) {
+                tagIdSet.add(tagDto.getId());
+            }
+            userBookTagDao.updateTagList(userBookId, tagIdSet);
+        }
+    }
+
+
 }
