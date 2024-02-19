@@ -167,6 +167,12 @@ public class UserBookDao implements Dao<UserBook>{
         List<Object[]> l = PaginatedLists.executePaginatedQuery(paginatedList, queryParam, sortCriteria);
         
         // Assemble results
+        List<UserBookDto> userBookDtoList = assembleResults(l);
+
+        paginatedList.setResultList(userBookDtoList);
+    }
+
+    private static List<UserBookDto> assembleResults(List<Object[]> l) {
         List<UserBookDto> userBookDtoList = new ArrayList<UserBookDto>();
         for (Object[] o : l) {
             int i = 0;
@@ -187,7 +193,6 @@ public class UserBookDao implements Dao<UserBook>{
             }
             userBookDtoList.add(userBookDto);
         }
-
-        paginatedList.setResultList(userBookDtoList);
+        return userBookDtoList;
     }
 }
