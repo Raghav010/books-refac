@@ -228,7 +228,7 @@ public class UserDao implements Dao<User> {
         List<UserDto> userDtoList = new ArrayList<UserDto>();
         for (Object[] o : l) {
             int i = 0;
-            UserDto userDto = new UserDto();
+            UserDto userDto = new UserDto(null,null,null,null,null);
             userDto.setId((String) o[i++]);
             userDto.setUsername((String) o[i++]);
             userDto.setEmail((String) o[i++]);
