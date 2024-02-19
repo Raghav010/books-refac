@@ -60,7 +60,9 @@ public class BookDataService extends AbstractIdleService {
      * Open Library API URL.
      */
     private static final String OPEN_LIBRARY_FORMAT = "http://openlibrary.org/api/volumes/brief/isbn/%s.json";
-    
+    private static final int CONNECT_TIMEOUT = 10000;
+    private static final int READ_TIMEOUT = 10000;
+
     /**
      * Executor for book API requests.
      */
@@ -218,8 +220,8 @@ public class BookDataService extends AbstractIdleService {
         URLConnection connection = url.openConnection();
         connection.setRequestProperty("Accept-Charset", "utf-8");
         connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36");
-        connection.setConnectTimeout(10000);
-        connection.setReadTimeout(10000);
+        connection.setConnectTimeout(CONNECT_TIMEOUT);
+        connection.setReadTimeout(READ_TIMEOUT);
         return connection.getInputStream();
     }
 
@@ -285,8 +287,8 @@ public class BookDataService extends AbstractIdleService {
     public void downloadThumbnail(Book book, String imageUrl) throws Exception {
         URLConnection imageConnection = new URL(imageUrl).openConnection();
         imageConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36");
-        imageConnection.setConnectTimeout(10000);
-        imageConnection.setReadTimeout(10000);
+        imageConnection.setConnectTimeout(CONNECT_TIMEOUT);
+        imageConnection.setReadTimeout(READ_TIMEOUT);
         try (InputStream inputStream = new BufferedInputStream(imageConnection.getInputStream())) {
             if (MimeTypeUtil.guessMimeType(inputStream) != MimeType.IMAGE_JPEG) {
                 throw new Exception("Only JPEG images are supported as thumbnails");
