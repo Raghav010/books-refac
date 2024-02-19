@@ -24,6 +24,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import com.sismics.books.rest.resource.UserResourceHelper;
 import com.sismics.books.core.constant.Constants;
 import com.sismics.books.core.dao.jpa.AuthenticationTokenDao;
 import com.sismics.books.core.dao.jpa.RoleBaseFunctionDao;
@@ -41,6 +42,7 @@ import com.sismics.rest.exception.ServerException;
 import com.sismics.rest.util.ValidationUtil;
 import com.sismics.security.UserPrincipal;
 import com.sismics.util.filter.TokenBasedSecurityFilter;
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 
 /**
  * User REST resources.
@@ -78,20 +80,14 @@ public class UserResource extends ExtendedBaseResource {
         checkBaseFunction(BaseFunction.ADMIN);
         
         // Validate the input data
-        username = ValidationUtil.validateLength(username, "username", 3, 50);
+        username = ValidationUtil.validateLength(username, "username", Constants.MIN_USERNAME_LEN, Constants.MAX_USERNAME_LEN);
         ValidationUtil.validateAlphanumeric(username, "username");
-        password = ValidationUtil.validateLength(password, "password", 8, 50);
-        email = ValidationUtil.validateLength(email, "email", 3, 50);
+        password = ValidationUtil.validateLength(password, "password", Constants.MIN_PWD_LEN, Constants.MAX_PWD_LEN);
+        email = ValidationUtil.validateLength(email, "email", Constants.MIN_EMAIL_LEN, Constants.MAX_EMAIL_LEN);
         ValidationUtil.validateEmail(email, "email");
         
         // Create the user
-        User user = new User();
-        user.setRoleId(Constants.DEFAULT_USER_ROLE);
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setEmail(email);
-        user.setCreateDate(new Date());
-        user.setLocaleId(Constants.DEFAULT_LOCALE_ID);
+        User user = UserResourceHelper.createUser(new UserDto(null, password, username, email, null));
         
         // Create the user
         UserDao userDao = new UserDao();
@@ -136,22 +132,19 @@ public class UserResource extends ExtendedBaseResource {
         }
         
         // Validate the input data
-        password = ValidationUtil.validateLength(password, "password", 8, 50, true);
-        email = ValidationUtil.validateLength(email, "email", null, 100, true);
-        localeId = ValidationUtil.validateLocale(localeId, "locale", true);
-        themeId = ValidationUtil.validateTheme(themeId, "theme", true);
-        
+        UserDto newDetails = UserResourceHelper.validateUserDto(new UserDto(themeId, localeId, password, email, null));
+
         // Update the user
         UserDao userDao = new UserDao();
         User user = userDao.getActiveByUsername(principal.getName());
-        if (email != null) {
-            user.setEmail(email);
+        if (newDetails.getEmail() != null) {
+            user.setEmail(newDetails.getEmail());
         }
-        if (themeId != null) {
-            user.setTheme(themeId);
+        if (newDetails.getId() != null) {
+            user.setTheme(newDetails.getId());
         }
-        if (localeId != null) {
-            user.setLocaleId(localeId);
+        if (newDetails.getLocaleId() != null) {
+            user.setLocaleId(newDetails.getLocaleId());
         }
         if (firstConnection != null && hasBaseFunction(BaseFunction.ADMIN)) {
             user.setFirstConnection(firstConnection);
@@ -159,8 +152,8 @@ public class UserResource extends ExtendedBaseResource {
         
         user = userDao.update(user);
         
-        if (StringUtils.isNotBlank(password)) {
-            user.setPassword(password);
+        if (StringUtils.isNotBlank(newDetails.getUsername())) {
+            user.setPassword(newDetails.getUsername());
             userDao.updatePassword(user);
         }
         
@@ -197,11 +190,8 @@ public class UserResource extends ExtendedBaseResource {
         checkBaseFunction(BaseFunction.ADMIN);
         
         // Validate the input data
-        password = ValidationUtil.validateLength(password, "password", 8, 50, true);
-        email = ValidationUtil.validateLength(email, "email", null, 100, true);
-        localeId = ValidationUtil.validateLocale(localeId, "locale", true);
-        themeId = ValidationUtil.validateTheme(themeId, "theme", true);
-        
+        UserDto newDetails = UserResourceHelper.validateUserDto(new UserDto(themeId, localeId, password, email, null));
+
         // Check if the user exists
         UserDao userDao = new UserDao();
         User user = userDao.getActiveByUsername(username);
@@ -210,21 +200,21 @@ public class UserResource extends ExtendedBaseResource {
         }
 
         // Update the user
-        if (email != null) {
-            user.setEmail(email);
+        if (newDetails.getEmail() != null) {
+            user.setEmail(newDetails.getEmail());
         }
-        if (themeId != null) {
-            user.setTheme(themeId);
+        if (newDetails.getId() != null) {
+            user.setTheme(newDetails.getId());
         }
-        if (localeId != null) {
-            user.setLocaleId(localeId);
+        if (newDetails.getLocaleId() != null) {
+            user.setLocaleId(newDetails.getLocaleId());
         }
         
         user = userDao.update(user);
         
-        if (StringUtils.isNotBlank(password)) {
+        if (StringUtils.isNotBlank(newDetails.getUsername())) {
             // Change the password
-            user.setPassword(password);
+            user.setPassword(newDetails.getUsername());
             userDao.updatePassword(user);
         }
         
@@ -529,6 +519,18 @@ public class UserResource extends ExtendedBaseResource {
         
         return Response.ok().entity(response).build();
     }
+
+    public String getSessionToken() {
+        String authToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (TokenBasedSecurityFilter.COOKIE_NAME.equals(cookie.getName())) {
+                    authToken = cookie.getValue();
+                }
+            }
+        }
+        return authToken;
+    }
     
     /**
      * Returns all active sessions.
@@ -545,14 +547,7 @@ public class UserResource extends ExtendedBaseResource {
         }
         
         // Get the value of the session token
-        String authToken = null;
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (TokenBasedSecurityFilter.COOKIE_NAME.equals(cookie.getName())) {
-                    authToken = cookie.getValue();
-                }
-            }
-        }
+        String authToken = getSessionToken();
         
         JSONObject response = new JSONObject();
         List<JSONObject> sessions = new ArrayList<>();
@@ -588,14 +583,7 @@ public class UserResource extends ExtendedBaseResource {
         }
         
         // Get the value of the session token
-        String authToken = null;
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (TokenBasedSecurityFilter.COOKIE_NAME.equals(cookie.getName())) {
-                    authToken = cookie.getValue();
-                }
-            }
-        }
+        String authToken = getSessionToken();
         
         // Remove other tokens
         AuthenticationTokenDao authenticationTokenDao = new AuthenticationTokenDao();

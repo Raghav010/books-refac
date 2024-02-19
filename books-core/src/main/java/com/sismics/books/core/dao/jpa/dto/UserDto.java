@@ -32,6 +32,17 @@ public class UserDto {
     private Long createTimestamp;
 
     /**
+     * Default constructor.
+     */
+    public UserDto(String id, String localeId, String username, String email, Long createTimestamp) {
+        this.id = id;
+        this.localeId = localeId;
+        this.username = username;
+        this.email = email;
+        this.createTimestamp = createTimestamp;
+    }
+
+    /**
      * Getter of id.
      *
      * @return id
