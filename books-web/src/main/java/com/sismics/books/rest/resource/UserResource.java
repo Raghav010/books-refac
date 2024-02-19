@@ -25,6 +25,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.sismics.books.rest.resource.UserResourceHelper;
+import com.sismics.books.core.constant.Constants;
 import com.sismics.books.core.dao.jpa.AuthenticationTokenDao;
 import com.sismics.books.core.dao.jpa.RoleBaseFunctionDao;
 import com.sismics.books.core.dao.jpa.UserDao;
@@ -41,6 +42,7 @@ import com.sismics.rest.exception.ServerException;
 import com.sismics.rest.util.ValidationUtil;
 import com.sismics.security.UserPrincipal;
 import com.sismics.util.filter.TokenBasedSecurityFilter;
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 
 /**
  * User REST resources.
@@ -78,10 +80,10 @@ public class UserResource extends ExtendedBaseResource {
         checkBaseFunction(BaseFunction.ADMIN);
         
         // Validate the input data
-        username = ValidationUtil.validateLength(username, "username", 3, 50);
+        username = ValidationUtil.validateLength(username, "username", Constants.MIN_USERNAME_LEN, Constants.MAX_USERNAME_LEN);
         ValidationUtil.validateAlphanumeric(username, "username");
-        password = ValidationUtil.validateLength(password, "password", 8, 50);
-        email = ValidationUtil.validateLength(email, "email", 3, 50);
+        password = ValidationUtil.validateLength(password, "password", Constants.MIN_PWD_LEN, Constants.MAX_PWD_LEN);
+        email = ValidationUtil.validateLength(email, "email", Constants.MIN_EMAIL_LEN, Constants.MAX_EMAIL_LEN);
         ValidationUtil.validateEmail(email, "email");
         
         // Create the user
@@ -130,10 +132,10 @@ public class UserResource extends ExtendedBaseResource {
         }
         
         // Validate the input data
-        password = ValidationUtil.validateLength(password, "password", 8, 50, true);
-        email = ValidationUtil.validateLength(email, "email", null, 100, true);
-        localeId = ValidationUtil.validateLocale(localeId, "locale", true);
-        themeId = ValidationUtil.validateTheme(themeId, "theme", true);
+        password = ValidationUtil.validateLength(password, "password", Constants.MIN_PWD_LEN, Constants.MAX_PWD_LEN, Constants.PWD_NULLABLE);
+        email = ValidationUtil.validateLength(email, "email", Constants.MIN_EMAIL_LEN, Constants.MAX_EMAIL_LEN, Constants.EMAIL_NULLABLE);
+        localeId = ValidationUtil.validateLocale(localeId, "locale", Constants.LOCALE_ID_NULLABLE);
+        themeId = ValidationUtil.validateTheme(themeId, "theme", Constants.THEME_ID_NULLABLE);
         
         // Update the user
         UserDao userDao = new UserDao();
